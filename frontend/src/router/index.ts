@@ -10,6 +10,14 @@ const router = createRouter({
       component: Health,
     },
     {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/LeagueDashboard.vue'),
+      meta: {
+        title: 'League Dashboard',
+      },
+    },
+    {
       path: '/demo',
       name: 'demo',
       // Lazy load demo page to reduce initial bundle size
