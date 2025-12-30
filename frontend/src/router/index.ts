@@ -9,6 +9,12 @@ const router = createRouter({
       name: 'health',
       component: Health,
     },
+    {
+      path: '/demo',
+      name: 'demo',
+      // Lazy load demo page to reduce initial bundle size
+      component: () => import('../views/Demo.vue'),
+    },
   ],
 })
 
