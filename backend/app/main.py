@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.adapters import router as adapters_router
 from app.config import DATA_DIR, settings
 from app.db import get_db
 from app.models import League
@@ -32,6 +33,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(adapters_router)
 
 
 @app.get("/health")
