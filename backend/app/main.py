@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.adapters import router as adapters_router
+from app.api.leagues import router as leagues_router
 from app.config import DATA_DIR, settings
 from app.db import get_db
 from app.models import League
@@ -36,6 +37,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(adapters_router)
+app.include_router(leagues_router)
 
 
 @app.get("/health")

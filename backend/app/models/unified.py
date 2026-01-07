@@ -10,7 +10,13 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+def to_camel(string: str) -> str:
+    """Convert snake_case to camelCase."""
+    components = string.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
 
 
 # ============================================================================
@@ -107,7 +113,11 @@ class UnifiedLeague(BaseModel):
         description="Additional platform-specific settings as key-value pairs",
     )
 
-    model_config = {"use_enum_values": True}
+    model_config = ConfigDict(
+        use_enum_values=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
 
 class UnifiedTeam(BaseModel):
@@ -142,7 +152,11 @@ class UnifiedTeam(BaseModel):
         default_factory=dict, description="Additional platform-specific team data"
     )
 
-    model_config = {"use_enum_values": True}
+    model_config = ConfigDict(
+        use_enum_values=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
 
 class UnifiedPlayer(BaseModel):
@@ -191,7 +205,11 @@ class UnifiedPlayer(BaseModel):
         default_factory=dict, description="Additional platform-specific player data"
     )
 
-    model_config = {"use_enum_values": True}
+    model_config = ConfigDict(
+        use_enum_values=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
 
 class DraftPick(BaseModel):
@@ -205,6 +223,11 @@ class DraftPick(BaseModel):
     player_name: str = Field(..., description="Name of player drafted")
     bid_amount: Optional[float] = Field(
         None, description="Auction bid amount (if auction draft)"
+    )
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        alias_generator=to_camel,
     )
 
 
@@ -230,7 +253,11 @@ class UnifiedDraft(BaseModel):
     draft_date: Optional[datetime] = Field(None, description="When draft occurred")
     is_complete: bool = Field(default=False, description="Whether draft is complete")
 
-    model_config = {"use_enum_values": True}
+    model_config = ConfigDict(
+        use_enum_values=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
 
 class UnifiedTransaction(BaseModel):
@@ -283,7 +310,11 @@ class UnifiedTransaction(BaseModel):
         default_factory=dict, description="Additional platform-specific transaction data"
     )
 
-    model_config = {"use_enum_values": True}
+    model_config = ConfigDict(
+        use_enum_values=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
 
 class UnifiedMatchup(BaseModel):
@@ -341,4 +372,8 @@ class UnifiedMatchup(BaseModel):
         default_factory=dict, description="Additional platform-specific matchup data"
     )
 
-    model_config = {"use_enum_values": True}
+    model_config = ConfigDict(
+        use_enum_values=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )

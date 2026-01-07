@@ -53,15 +53,7 @@ const standingsData = computed<StandingsRow[]>(() => {
 
 function calculateStreak(_team: Team): string {
   // This is a placeholder - in a real app, you'd calculate from recent games
-  // For now, just show a simple indicator
-  const recentWins = Math.floor(Math.random() * 4)
-  const recentLosses = Math.floor(Math.random() * 4)
-
-  if (recentWins > recentLosses) {
-    return `W${recentWins}`
-  } else if (recentLosses > recentWins) {
-    return `L${recentLosses}`
-  }
+  // Returning a static value to avoid reactive loops
   return '-'
 }
 
@@ -121,7 +113,7 @@ const skeletonData = Array.from({ length: 10 }, (_, i) => ({
         </div>
         <div v-else>
           <div class="font-semibold">{{ data.name }}</div>
-          <div class="text-sm text-gray-500 dark:text-gray-400">{{ data.owner }}</div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">{{ data.ownerName }}</div>
         </div>
       </template>
     </Column>

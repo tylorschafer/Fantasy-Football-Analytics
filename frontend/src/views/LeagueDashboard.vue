@@ -1,150 +1,32 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
 import { useLeagueStore } from '../stores/league'
 import { useUiStore } from '../stores/ui'
 import LeagueSummaryCard from '../components/LeagueSummaryCard.vue'
 import StandingsTable from '../components/StandingsTable.vue'
 import QuickStatsGrid from '../components/QuickStatsGrid.vue'
+import ConnectLeagueDialog from '../components/ConnectLeagueDialog.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
+import type { League } from '../stores/league'
 
-const router = useRouter()
 const leagueStore = useLeagueStore()
 const uiStore = useUiStore()
 
+const showConnectDialog = ref(false)
 const isLoading = computed(() => uiStore.loadingStates['league:fetch'] || uiStore.loadingStates['league:standings'])
 const hasError = computed(() => uiStore.hasError)
 const errorMessage = computed(() => uiStore.globalError?.message || 'An error occurred')
 
-// For demo purposes, generate mock data
-const mockLeague = ref({
-  id: 'demo-league-123',
-  name: 'Fantasy Football Champions',
-  season: 2024,
-  platform: 'sleeper' as const,
-  teams: [
-    {
-      id: '1',
-      name: 'Thunder Cats',
-      owner: 'Alex Johnson',
-      wins: 9,
-      losses: 3,
-      ties: 0,
-      pointsFor: 1425.6,
-      pointsAgainst: 1298.4,
-    },
-    {
-      id: '2',
-      name: 'Gridiron Gang',
-      owner: 'Sarah Miller',
-      wins: 8,
-      losses: 4,
-      ties: 0,
-      pointsFor: 1398.2,
-      pointsAgainst: 1312.8,
-    },
-    {
-      id: '3',
-      name: 'The Eliminators',
-      owner: 'Mike Wilson',
-      wins: 8,
-      losses: 4,
-      ties: 0,
-      pointsFor: 1375.9,
-      pointsAgainst: 1289.5,
-    },
-    {
-      id: '4',
-      name: 'Dynasty Warriors',
-      owner: 'Emily Davis',
-      wins: 7,
-      losses: 5,
-      ties: 0,
-      pointsFor: 1356.4,
-      pointsAgainst: 1334.2,
-    },
-    {
-      id: '5',
-      name: 'Red Zone Rebels',
-      owner: 'Chris Brown',
-      wins: 7,
-      losses: 5,
-      ties: 0,
-      pointsFor: 1342.1,
-      pointsAgainst: 1345.7,
-    },
-    {
-      id: '6',
-      name: 'End Zone Elite',
-      owner: 'Jessica Taylor',
-      wins: 6,
-      losses: 6,
-      ties: 0,
-      pointsFor: 1328.5,
-      pointsAgainst: 1356.9,
-    },
-    {
-      id: '7',
-      name: 'Touchdown Titans',
-      owner: 'David Martinez',
-      wins: 6,
-      losses: 6,
-      ties: 0,
-      pointsFor: 1298.7,
-      pointsAgainst: 1342.3,
-    },
-    {
-      id: '8',
-      name: 'Blitz Brigade',
-      owner: 'Amanda Garcia',
-      wins: 5,
-      losses: 7,
-      ties: 0,
-      pointsFor: 1276.3,
-      pointsAgainst: 1378.1,
-    },
-    {
-      id: '9',
-      name: 'The Fumble Bunch',
-      owner: 'Ryan Anderson',
-      wins: 4,
-      losses: 8,
-      ties: 0,
-      pointsFor: 1245.8,
-      pointsAgainst: 1398.6,
-    },
-    {
-      id: '10',
-      name: 'Last Place Legends',
-      owner: 'Nicole Thomas',
-      wins: 2,
-      losses: 10,
-      ties: 0,
-      pointsFor: 1198.4,
-      pointsAgainst: 1456.2,
-    },
-  ],
-  currentWeek: 13,
-  totalWeeks: 17,
-  scoringType: 'ppr' as const,
-})
+function handleLeagueConnected(league: League) {
+  leagueStore.setCurrentLeague(league)
+  showConnectDialog.value = false
+}
 
-onMounted(async () => {
-  // In a real app, this would fetch actual league data
-  // For demo purposes, we'll use mock data
-  try {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    // Set mock data to store
-    leagueStore.setCurrentLeague(mockLeague.value)
-  } catch (error) {
-    console.error('Failed to load league:', error)
-    uiStore.setError(error as Error)
-  }
-})
+function handleConnectClick() {
+  showConnectDialog.value = true
+}
 
 function handleTeamClick(team: any) {
   console.log('Team clicked:', team)
@@ -153,8 +35,12 @@ function handleTeamClick(team: any) {
 }
 
 function handleRefresh() {
-  // In a real app, refetch data
+  // In a real app, refetch data from the API
   console.log('Refreshing league data...')
+  if (leagueStore.currentLeague) {
+    // Could re-fetch using the same league ID
+    leagueStore.fetchLeague(leagueStore.currentLeague.id)
+  }
 }
 </script>
 
@@ -169,7 +55,7 @@ function handleRefresh() {
     </Message>
 
     <!-- Main Dashboard Layout -->
-    <div class="dashboard-container">
+    <div v-if="leagueStore.hasLeague" class="dashboard-container">
       <!-- Left Column: Summary + Stats -->
       <div class="dashboard-sidebar">
         <!-- League Summary -->
@@ -179,6 +65,16 @@ function handleRefresh() {
         <QuickStatsGrid
           :teams="leagueStore.teams"
           :loading="isLoading"
+        />
+
+        <!-- Change League Button -->
+        <Button
+          label="Connect Different League"
+          icon="pi pi-sync"
+          severity="secondary"
+          outlined
+          class="change-league-btn"
+          @click="handleConnectClick"
         />
       </div>
 
@@ -214,7 +110,7 @@ function handleRefresh() {
     </div>
 
     <!-- Empty State -->
-    <Card v-if="!isLoading && !leagueStore.hasLeague && !hasError" class="empty-state">
+    <Card v-else-if="!isLoading && !hasError" class="empty-state">
       <template #content>
         <div class="empty-state-content">
           <i class="pi pi-inbox"></i>
@@ -223,12 +119,18 @@ function handleRefresh() {
           <Button
             label="Connect League"
             icon="pi pi-link"
-            severity="secondary"
-            @click="router.push('/')"
+            size="large"
+            @click="handleConnectClick"
           />
         </div>
       </template>
     </Card>
+
+    <!-- Connect League Dialog -->
+    <ConnectLeagueDialog
+      v-model:visible="showConnectDialog"
+      @league-connected="handleLeagueConnected"
+    />
   </div>
 </template>
 
@@ -260,6 +162,18 @@ function handleRefresh() {
   gap: 1.5rem;
   position: sticky;
   top: 1.5rem;
+}
+
+.change-league-btn {
+  width: 100%;
+  background: white;
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #667eea;
+}
+
+.change-league-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
 }
 
 /* Right Main Area */

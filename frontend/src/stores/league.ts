@@ -6,7 +6,7 @@ import { useUiStore } from './ui'
 export interface Team {
   id: string
   name: string
-  owner: string
+  ownerName: string
   wins: number
   losses: number
   ties: number
@@ -40,9 +40,15 @@ export interface League {
   season: number
   platform: 'espn' | 'sleeper' | 'yahoo'
   teams: Team[]
-  currentWeek: number
-  totalWeeks: number
-  scoringType: 'standard' | 'ppr' | 'half_ppr'
+  scoringType: 'standard' | 'ppr' | 'half_ppr' | 'custom'
+  numTeams: number
+  rosterPositions: Record<string, number>
+  playoffTeams?: number
+  playoffStartWeek?: number
+  settings?: Record<string, any>
+  // Computed/optional fields for display
+  currentWeek?: number
+  totalWeeks?: number
 }
 
 export const useLeagueStore = defineStore('league', () => {

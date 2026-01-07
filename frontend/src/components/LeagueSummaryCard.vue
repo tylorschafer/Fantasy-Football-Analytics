@@ -34,10 +34,12 @@ const scoringTypeLabel = computed(() => {
 const playoffStatus = computed(() => {
   if (!props.league) return ''
 
-  const { currentWeek, totalWeeks } = props.league
-  const regularSeasonWeeks = totalWeeks - 4 // Assuming 4 playoff weeks
+  const currentWeek = props.league.currentWeek || 1
+  const totalWeeks = props.league.totalWeeks || 17
+  const playoffStart = props.league.playoffStartWeek || 15
+  const regularSeasonWeeks = playoffStart - 1
 
-  if (currentWeek <= regularSeasonWeeks) {
+  if (currentWeek < playoffStart) {
     return `Week ${currentWeek} of ${regularSeasonWeeks}`
   } else {
     return 'Playoffs'
@@ -46,8 +48,9 @@ const playoffStatus = computed(() => {
 
 const isPlayoffs = computed(() => {
   if (!props.league) return false
-  const regularSeasonWeeks = props.league.totalWeeks - 4
-  return props.league.currentWeek > regularSeasonWeeks
+  const currentWeek = props.league.currentWeek || 1
+  const playoffStart = props.league.playoffStartWeek || 15
+  return currentWeek >= playoffStart
 })
 </script>
 
